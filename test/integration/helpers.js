@@ -72,10 +72,10 @@ module.exports = {
         if (err) return fn(err);
 
         try {
-          var result = JSON.parse(res.output);
-          result.code = res.code;
+          var result = toJSONRunResult(res);
+          fn(null, result);
         } catch (err) {
-          return fn(
+          fn(
             new Error(
               format(
                 'Failed to parse JSON reporter output from result:\n\n%O',
@@ -84,8 +84,6 @@ module.exports = {
             )
           );
         }
-
-        fn(null, result);
       },
       opts
     );
@@ -149,8 +147,23 @@ module.exports = {
   /**
    * Resolves the path to a fixture to the full path.
    */
-  resolveFixturePath: resolveFixturePath
+  resolveFixturePath: resolveFixturePath,
+
+  toJSONRunResult: toJSONRunResult
 };
+
+/**
+ * Coerce output as returned by _spawnMochaWithListeners using JSON reporter into a JSONRunResult as
+ * recognized by our custom unexpected assertions
+ * @param {string} result - Raw stdout from Mocha run using JSON reporter
+ * @private
+ */
+function toJSONRunResult(result) {
+  var code = result.code;
+  result = JSON.parse(result.output);
+  result.code = code;
+  return result;
+}
 
 function invokeMocha(args, fn, opts) {
   args = [path.join(__dirname, '..', '..', 'bin', 'mocha')].concat(args);

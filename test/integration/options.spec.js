@@ -7,6 +7,7 @@ var runMochaJSON = helpers.runMochaJSON;
 var runMochaJSONRaw = helpers.runMochaJSONRaw;
 var invokeMocha = helpers.invokeMocha;
 var resolvePath = helpers.resolveFixturePath;
+var toJSONRunResult = helpers.toJSONRunResult;
 var args = [];
 
 describe('options', function() {
@@ -585,6 +586,34 @@ describe('options', function() {
             return done(err);
           }
           expect(result, 'to have failed');
+          done();
+        }
+      );
+    });
+  });
+
+  describe('--extension', function() {
+    it('should allow comma-separated variables', function(done) {
+      invokeMocha(
+        [
+          '--require',
+          'coffee-script/register',
+          '--require',
+          './test/setup',
+          '--reporter',
+          'json',
+          '--extension',
+          'js,coffee',
+          'test/integration/fixtures/options/extension'
+        ],
+        function(err, result) {
+          if (err) {
+            return done(err);
+          }
+          expect(toJSONRunResult(result), 'to have passed').and(
+            'to have passed test count',
+            2
+          );
           done();
         }
       );
